@@ -1,0 +1,15 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "serve": "npx cross-env NODE_ENV=development node ./esbuild.serve.config.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@chialab/esbuild-plugin-html": "^0.17.2",
+    "@zhourengui/esbuild-dev-server": "^1.0.1",
+    "cross-env": "^7.0.3"
+  }
+}

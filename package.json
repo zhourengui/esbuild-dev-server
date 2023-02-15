@@ -1,0 +1,37 @@
+{
+  "name": "@zhourengui/esbuild-dev-server",
+  "version": "1.0.2",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc --project tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zhourengui/esbuild-dev-server.git"
+  },
+  "homepage": "https://github.com/zhourengui",
+  "keywords": [
+    "esbuild",
+    "http-proxy",
+    "proxy",
+    "dev-server"
+  ],
+  "devDependencies": {
+    "tsc": "^2.0.4",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "esbuild": "^0.17.8",
+    "open": "^8.4.1"
+  },
+  "authors": [
+    "Rengui Zhou <729049182@qq.com> (https://github.com/zhourengui)"
+  ],
+  "files": [
+    "lib",
+    "src",
+    "example"
+  ]
+}
