@@ -1,3 +1,6 @@
+import chalk from 'chalk';
+import connect from 'connect';
+import cors from 'cors';
 import esbuild from 'esbuild';
 import http from 'http';
 import https from 'https';
@@ -40,77 +43,86 @@ export async function createDevServer(
     port: port,
     servedir: servedir,
   });
+  const app = connect()
+    .use(cors())
+    .use((req, res) => {
+      const forwardRequest = (path: string) => {
+        const filterProxy = Object.keys(proxy ?? {}).filter((prefix) =>
+          new RegExp(prefix).test(path)
+        );
 
-  // http proxy
-  const server = http.createServer((req, res) => {
-    let path = req.url!;
+        filterProxy.forEach((prefix) => {
+          const { target, pathRewrite, changeOrigin } = proxy![prefix];
 
-    const filterProxy = Object.keys(proxy ?? {}).filter((prefix) =>
-      new RegExp(prefix).test(path)
-    );
+          Object.keys(pathRewrite ?? {}).forEach((prefix) => {
+            const regexp = new RegExp(prefix);
 
-    filterProxy.forEach((prefix) => {
-      const { target, pathRewrite, changeOrigin } = proxy![prefix];
+            if (regexp.test(path)) {
+              path = path.replace(regexp, pathRewrite![prefix]);
+            }
+          });
+          const url = new URL(target + path);
+          const origin = changeOrigin
+            ? url.protocol + '//' + url.host
+            : req.headers.origin;
 
-      Object.keys(pathRewrite ?? {}).forEach((prefix) => {
-        const regexp = new RegExp(prefix);
+          req.pipe(
+            https.request(
+              url.href,
+              {
+                method: req.method,
+                headers: {
+                  ...req.headers,
+                  origin: origin,
+                  host: '',
+                },
+              },
+              (proxy) => {
+                res.writeHead(proxy.statusCode!, proxy.headers);
+                proxy.pipe(res, { end: true });
+              }
+            ),
+            { end: true }
+          );
 
-        if (regexp.test(path)) {
-          path = path.replace(regexp, pathRewrite![prefix]);
+          console.log(
+            `${chalk.hex('#62bb35').bold('[HTTP Proxy]')}: ${chalk
+              .hex('#eecc16')
+              .bold(path)} -> ${chalk.hex('#eecc16').bold(url.href)}`
+          );
+
+          return;
+        });
+
+        // no proxy required
+        if (filterProxy.length === 0) {
+          req.pipe(
+            http.request(
+              {
+                hostname: host,
+                port: actualPort,
+                path,
+                method: req.method,
+                headers: req.headers,
+              },
+              (proxy) => {
+                if (proxy.statusCode === 404) {
+                  return forwardRequest('/');
+                }
+
+                res.writeHead(proxy.statusCode!, proxy.headers);
+                proxy.pipe(res, { end: true });
+              }
+            ),
+            { end: true }
+          );
         }
-      });
+      };
 
-      const url = new URL(target + path);
-      const hostSplit = url.host.split('.');
-      const host = changeOrigin
-        ? hostSplit
-            .slice(hostSplit.length - 1 + 3, hostSplit.length - 1)
-            .join('.')
-        : req.headers.host;
-
-      req.pipe(
-        https.request(
-          url.href,
-          {
-            method: req.method,
-            headers: {
-              ...req.headers,
-              host: host,
-            },
-          },
-          (proxy) => {
-            res.writeHead(proxy.statusCode!, proxy.headers);
-            proxy.pipe(res, { end: true });
-          }
-        ),
-        { end: true }
-      );
-
-      return;
+      forwardRequest(req.url!);
     });
 
-    // no proxy required
-    if (filterProxy.length === 0) {
-      req.pipe(
-        http.request(
-          {
-            hostname: host,
-            port: actualPort,
-            path,
-            method: req.method,
-            headers: req.headers,
-          },
-          (proxy) => {
-            res.writeHead(proxy.statusCode!, proxy.headers);
-            proxy.pipe(res, { end: true });
-          }
-        ),
-        { end: true }
-      );
-    }
-  });
-
-  server.listen(actualPort);
+  http.createServer(app).listen(actualPort);
 
   if (isOpenInDefaultBrowser) {
     open(`http://localhost:${actualPort}/`);

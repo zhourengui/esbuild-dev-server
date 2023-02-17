@@ -9,7 +9,7 @@
   "dependencies": {},
   "devDependencies": {
     "@chialab/esbuild-plugin-html": "^0.17.2",
-    "@zhourengui/esbuild-dev-server": "^1.0.1",
+    "@zhourengui/esbuild-dev-server": "^1.0.5",
     "cross-env": "^7.0.3"
   }
 }
