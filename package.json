@@ -1,6 +1,6 @@
 {
   "name": "@zhourengui/esbuild-dev-server",
-  "version": "1.0.9",
+  "version": "1.0.11",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
@@ -25,6 +25,7 @@
   "dependencies": {
     "chalk": "^4.1.2",
     "connect": "^3.7.0",
+    "connect-history-api-fallback": "^2.0.0",
     "cors": "^2.8.5",
     "esbuild": "^0.17.8",
     "open": "^8.4.1"
