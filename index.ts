@@ -118,6 +118,12 @@ export async function createDevServer(
 
   const server = http.createServer(app);
 
+  server.on('error', (err) => console.log(err));
+
+  process.on('uncaughtException', function (err) {
+    console.error(err);
+  });
+
   server.listen(actualPort, 'localhost');
 
   if (isOpenInDefaultBrowser) {
