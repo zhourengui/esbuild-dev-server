@@ -72,30 +72,13 @@ Matching prefixes support regular expressions.
 
 ## Hot Reloading
 
-[Esbuild Hot Reloading](https://esbuild.github.io/api/#hot-reloading-css)
-
 Add the following code to the entry file:
 
 ```js
-new EventSource('/esbuild').addEventListener('change', (e) => {
-  const { added, removed, updated } = JSON.parse(e.data);
-
-  if (!added.length && !removed.length && updated.length === 1) {
-    for (const link of document.getElementsByTagName('link')) {
-      const url = new URL(link.href);
-
-      if (url.host === location.host && url.pathname === updated[0]) {
-        const next = link.cloneNode();
-        next.href = updated[0] + '?' + Math.random().toString(36).slice(2);
-        next.onload = () => link.remove();
-        link.parentNode.insertBefore(next, link.nextSibling);
-        return;
-      }
-    }
-  }
-
-  location.reload();
-});
+// Hot Module
+if (process.env.NODE_ENV === 'development') {
+  import('@zhourengui/esbuild-dev-server/lib/hot-reloading');
+}
 ```
 
 ## Todo List

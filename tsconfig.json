@@ -8,6 +8,6 @@
     "moduleResolution": "node",
     "module": "nodenext"
   },
-  "include": ["index.ts"],
+  "include": ["index.ts", "hot-reloading.ts"],
   "exclude": ["node_modules"]
 }
