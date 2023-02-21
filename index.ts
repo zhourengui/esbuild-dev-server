@@ -67,15 +67,17 @@ export async function createDevServer(
 
         const url = new URL(target + path);
         const host = changeOrigin ? url.host : req.headers.host;
+        const httpOrHttps = url.protocol === 'http:' ? http : https;
 
         req.pipe(
-          https.request(
+          httpOrHttps.request(
             url.href,
             {
               method: req.method,
               headers: {
                 ...req.headers,
                 host: host,
+                origin: url.protocol + '//' + url.host,
               },
             },
             (proxy) => {
@@ -121,10 +123,10 @@ export async function createDevServer(
   server.on('error', (err) => console.log(err));
 
   process.on('uncaughtException', function (err) {
-    console.error(err);
+    console.log(err);
   });
 
-  server.listen(actualPort, 'localhost');
+  server.listen(actualPort);
 
   if (isOpenInDefaultBrowser) {
     open(`http://localhost:${actualPort}/`);
